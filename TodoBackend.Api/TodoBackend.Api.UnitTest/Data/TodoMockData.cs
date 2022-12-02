@@ -11,7 +11,8 @@ public class TodoMockData
         {
             new TodoModel(Guid.NewGuid(), ".NET", false, 1),
             new TodoModel(Guid.NewGuid(), "C#", false, 2),
-            new TodoModel(Guid.NewGuid(), "TypeScript", false, 3)
+            new TodoModel(Guid.NewGuid(), "TypeScript", true, 3),
+            new TodoModel(Guid.NewGuid(), "Dapper", true, 4)
         }.ToImmutableList();
 
         return list;

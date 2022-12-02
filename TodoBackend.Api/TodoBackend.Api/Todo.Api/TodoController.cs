@@ -45,6 +45,21 @@ public class TodoController : ControllerBase
         return Ok(MappingTodoResponseFrom(todoModel));
     }
 
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteTodo(Guid id)
+    {
+        await _service.DeleteTodo(id);
+
+        return NoContent();
+    }
+
+    [HttpDelete]
+    public async Task<IActionResult> DeleteTodos([FromQuery] bool? isCompleted)
+    {
+        await _service.DeleteTodos(isCompleted);
+
+        return NoContent();
+    }
     private TodoResponse MappingTodoResponseFrom(TodoModel todoModel)
     {
         if (todoModel is null)

@@ -89,5 +89,82 @@ namespace TodoBackend.Api.UnitTest
             Assert.NotNull(result);
             result.Equals(todoModel);
         }
+
+        [Fact]
+        public async Task DeleteTodo_WithId_Verify()
+        {
+            // Arrange
+            var todoService = new Mock<ITodoService>();
+            TodoModel todoModel = TodoMockData.GetSampleTodoModel();
+
+            todoService.Setup(_ => _.DeleteTodo(It.IsAny<Guid>()))
+                                    .ReturnsAsync(1);
+
+            TodoController controller = new TodoController(todoService.Object);
+
+            // Act
+            await controller.DeleteTodo(todoModel.Id);
+
+            // Assert
+            todoService.Verify(r => r.DeleteTodo(todoModel.Id));
+        }
+
+        [Fact]
+        public async Task DeleteTodos_WithCompletedEqualNull_Verify()
+        {
+            // Arrange
+            var todoService = new Mock<ITodoService>();
+            IEnumerable<TodoModel> todoModel = TodoMockData.GetSampleTodosModel();
+
+            todoService.Setup(_ => _.DeleteTodos(It.IsAny<bool>()))
+                                    .ReturnsAsync(todoModel.Count());
+
+            TodoController controller = new TodoController(todoService.Object);
+
+            // Act
+            await controller.DeleteTodos(null);
+
+            // Assert
+            todoService.Verify(r => r.DeleteTodos(null));
+        }
+
+
+        [Fact]
+        public async Task DeleteTodos_WithCompletedEqualTrue_Verify()
+        {
+            // Arrange
+            var todoService = new Mock<ITodoService>();
+            IEnumerable<TodoModel> todoModel = TodoMockData.GetSampleTodosModel();
+
+            todoService.Setup(_ => _.DeleteTodos(It.IsAny<bool>()))
+                                    .ReturnsAsync(todoModel.Count());
+
+            TodoController controller = new TodoController(todoService.Object);
+
+            // Act
+            await controller.DeleteTodos(true);
+
+            // Assert
+            todoService.Verify(r => r.DeleteTodos(true));
+        }
+
+        [Fact]
+        public async Task DeleteTodos_WithCompletedEqualFalse_Verify()
+        {
+            // Arrange
+            var todoService = new Mock<ITodoService>();
+            IEnumerable<TodoModel> todoModel = TodoMockData.GetSampleTodosModel();
+
+            todoService.Setup(_ => _.DeleteTodos(It.IsAny<bool>()))
+                                    .ReturnsAsync(todoModel.Count());
+
+            TodoController controller = new TodoController(todoService.Object);
+
+            // Act
+            await controller.DeleteTodos(false);
+
+            // Assert
+            todoService.Verify(r => r.DeleteTodos(false));
+        }
     }
 }

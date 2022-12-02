@@ -91,4 +91,83 @@ public class TodoRepositoryTest
         Assert.NotNull(result);
         result.Equals(todoModel);
     }
+
+    [Fact]
+    public async Task DeleteTodo_WithId_Return_OneRow()
+    {
+        // Arrange
+        var todoRepository = new Mock<ITodoRepository>();
+        TodoModel todoModel = TodoMockData.GetSampleTodoModel();
+
+        todoRepository.Setup(_ => _.GetTodo(It.IsAny<Guid>()))
+                                   .ReturnsAsync(todoModel);
+
+        todoRepository.Setup(_ => _.DeleteTodo(It.IsAny<Guid>()))
+                                   .ReturnsAsync(1);
+
+        TodoService service = new TodoService(todoRepository.Object);
+
+        // Act
+        var nbRow = await service.DeleteTodo(todoModel.Id);
+
+        // Assert
+        Assert.True(nbRow > 0);
+    }
+
+    [Fact]
+    public async Task DeleteTodo_WithArgumentCompletedEqualTrue_Return_TwoRows()
+    {
+        // Arrange
+        var todoRepository = new Mock<ITodoRepository>();
+        IEnumerable<TodoModel> todoModel = TodoMockData.GetSampleTodosModel();
+
+        todoRepository.Setup(_ => _.DeleteTodos(It.IsAny<bool>()))
+                                   .ReturnsAsync(2);
+
+        TodoService service = new TodoService(todoRepository.Object);
+
+        // Act
+        var nbRow = await service.DeleteTodos(true);
+
+        // Assert
+        Assert.True(nbRow > 0);
+    }
+
+    [Fact]
+    public async Task DeleteTodo_WithArgumentCompletedEqualFalse_Return_TwoRows()
+    {
+        // Arrange
+        var todoRepository = new Mock<ITodoRepository>();
+        IEnumerable<TodoModel> todoModel = TodoMockData.GetSampleTodosModel();
+
+        todoRepository.Setup(_ => _.DeleteTodos(It.IsAny<bool>()))
+                                   .ReturnsAsync(2);
+
+        TodoService service = new TodoService(todoRepository.Object);
+
+        // Act
+        var nbRow = await service.DeleteTodos(false);
+
+        // Assert
+        Assert.True(nbRow > 0);
+    }
+
+    [Fact]
+    public async Task DeleteTodo_WithArgumentCompletedEqualNull_Return_AllRows()
+    {
+        // Arrange
+        var todoRepository = new Mock<ITodoRepository>();
+        IEnumerable<TodoModel> todoModel = TodoMockData.GetSampleTodosModel();
+
+        todoRepository.Setup(_ => _.DeleteTodos(It.IsAny<bool>()))
+                                   .ReturnsAsync(todoModel.Count());
+
+        TodoService service = new TodoService(todoRepository.Object);
+
+        // Act
+        var nbRow = await service.DeleteTodos(false);
+
+        // Assert
+        Assert.Equal(nbRow, todoModel.Count());
+    }
 }

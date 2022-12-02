@@ -44,6 +44,20 @@ public class TodoService : ITodoService
         return todoModel;
     }
 
+    public async Task<int> DeleteTodo(Guid id)
+    {
+        TodoModel todoModel = await _todoRepository.GetTodo(id);
+
+        if (todoModel is null)
+            throw new Exception($"The id: {id} was not found");
+
+        return await _todoRepository.DeleteTodo(id);
+    }
+
+    public async Task<int> DeleteTodos(bool? isCompleted)
+    {
+        return await _todoRepository.DeleteTodos(isCompleted);
+    }
 
     public async Task<TodoModel> CreateTodo(string title)
     {

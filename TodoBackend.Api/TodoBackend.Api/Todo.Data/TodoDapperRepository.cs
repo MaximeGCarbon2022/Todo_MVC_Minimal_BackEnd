@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using System.Data;
 using System.Data.SqlClient;
+using System.Text;
 using TodoBackend.Api.Todo.Service;
 
 namespace TodoBackend.Api.Todo.Data;
@@ -10,6 +11,22 @@ public class TodoDapperRepository : ITodoRepository
     private const string connectionId = "Default_Carbon";
     private const string schema = "[dbo]";
     private const string todoTableName = "[Todo]";
+
+    private const string sql_management_order = $@"
+;WITH CTE AS ( 
+	SELECT [Id]
+		  ,[Title]
+		  ,[Completed]
+		  ,[Order]
+		  ,ROW_NUMBER() OVER(ORDER BY (SELECT 1)) as rowNumber
+	  FROM {schema}.{todoTableName}
+)
+
+UPDATE {schema}.{todoTableName}
+SET [Order] = rowNumber
+FROM {schema}.{todoTableName} T
+INNER JOIN CTE C ON C.Id = T.Id
+";
 
     private readonly IConfiguration _configuration;
 
@@ -89,6 +106,42 @@ WHERE [Id] = @id"
         return todoModel;
     }
 
+    public async Task<int> DeleteTodo(Guid id)
+    {
+        var sql = new StringBuilder();
+
+        sql.Append($@"
+DELETE FROM {schema}.{todoTableName}
+WHERE Id = @id
+");
+
+        sql.Append(sql_management_order);
+
+        using IDbConnection connection = new SqlConnection(_configuration.GetConnectionString(connectionId));
+        int result = await connection.ExecuteAsync(sql.ToString(), new { id });
+
+        return result;
+    }
+
+    public async Task<int> DeleteTodos(bool? isCompleted)
+    {
+        var sql = new StringBuilder();
+
+        sql.Append($@"
+IF (@completed IS NULL)
+	DELETE FROM {schema}.{todoTableName}
+ELSE 
+	DELETE FROM {schema}.{todoTableName}
+	WHERE Completed = @completed
+");
+        sql.Append(sql_management_order);
+
+        using IDbConnection connection = new SqlConnection(_configuration.GetConnectionString(connectionId));
+        int result = await connection.ExecuteAsync(sql.ToString(), new { completed = isCompleted });
+
+        return result;
+    }
+
     private TodoModel MappingTodoModelFrom(TodoEntity todoEntity)
     {
         if (todoEntity is null)
@@ -97,4 +150,3 @@ WHERE [Id] = @id"
         return new TodoModel(todoEntity.Id, todoEntity.Title, todoEntity.Completed, todoEntity.Order);
     }
 }
-
