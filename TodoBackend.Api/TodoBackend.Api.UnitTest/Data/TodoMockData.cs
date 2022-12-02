@@ -19,5 +19,8 @@ public class TodoMockData
 
     public static TodoModel GetSampleTodoModel()
         => new TodoModel(Guid.NewGuid(), "Software craftsmanship", false, 1);
+
+    public static TodoModel GetSampleTodoModelModified(Guid id)
+        => new TodoModel(id, "Agilité", false, 10);
 }
 

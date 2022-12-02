@@ -68,5 +68,26 @@ namespace TodoBackend.Api.UnitTest
             Assert.NotNull(result);
             result.Equals(todoModel);
         }
+
+        [Fact]
+        public async Task UpdateTodo_WithTodo_Return_TodoModified()
+        {
+            // Arrange
+            var todoService = new Mock<ITodoService>();
+            TodoModel todoModel = TodoMockData.GetSampleTodoModel();
+
+            todoService.Setup(_ => _.CreateTodo(It.IsAny<string>()))
+                                    .ReturnsAsync(todoModel);
+
+            TodoController controller = new TodoController(todoService.Object);
+
+            // Act
+            TodoUpdateRequest todoRequest = new TodoUpdateRequest("Update Title", false, 10);
+            var result = await controller.UpdateTodo(todoModel.Id, todoRequest);
+
+            // Assert
+            Assert.NotNull(result);
+            result.Equals(todoModel);
+        }
     }
 }

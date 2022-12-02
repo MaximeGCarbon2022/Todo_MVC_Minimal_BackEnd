@@ -21,7 +21,10 @@ public class TodoDapperRepository : ITodoRepository
     public async Task<TodoModel> GetTodo(Guid id)
     {
         var sql = $@"
-SELECT Id, Title, Completed, [Order]
+SELECT [Id],
+       [Title],
+       [Completed],
+       [Order]
 FROM {schema}.{todoTableName}
 WHERE Id = @id"
 ;
@@ -34,7 +37,10 @@ WHERE Id = @id"
     public async Task<IEnumerable<TodoModel>> GetTodos()
     {
         var sql = $@"
-SELECT Id, Title, Completed, [Order]
+SELECT [Id],
+       [Title],
+       [Completed],
+       [Order]
 FROM {schema}.{todoTableName}
 ORDER BY [Order]
 ";
@@ -54,7 +60,7 @@ DECLARE @order INT = 0;
 IF ((SELECT COUNT(1) FROM {schema}.{todoTableName}) > 0)
 	SET @Order = (SELECT MAX([Order]) + 1 FROM {schema}.{todoTableName})
 
-INSERT INTO {schema}.{todoTableName} (Id, Title, [Order])
+INSERT INTO {schema}.{todoTableName} ([Id], [Title], [Order])
 VALUES (@id, @title, @order)
 
 SELECT @id
@@ -65,6 +71,22 @@ SELECT @id
 
         TodoModel TodoModel = await GetTodo(new Guid(id));
         return TodoModel;
+    }
+
+    public async Task<TodoModel> UpdateTodo(Guid id, string title, bool completed, int order)
+    {
+        var sql = $@"
+UPDATE {schema}.{todoTableName}
+SET [Title] = @title, 
+    [Completed] = @completed, 
+    [Order] = @order
+WHERE [Id] = @id"
+;
+        using IDbConnection connection = new SqlConnection(_configuration.GetConnectionString(connectionId));
+        await connection.ExecuteAsync(sql, new { id, title, completed, order });
+
+        TodoModel todoModel = await GetTodo(id);
+        return todoModel;
     }
 
     private TodoModel MappingTodoModelFrom(TodoEntity todoEntity)

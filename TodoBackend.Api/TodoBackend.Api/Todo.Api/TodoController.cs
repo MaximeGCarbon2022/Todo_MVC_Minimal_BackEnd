@@ -37,6 +37,14 @@ public class TodoController : ControllerBase
         return Created(todoResponse.Url, MappingTodoResponseFrom(todoModel));
     }
 
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateTodo(Guid id, TodoUpdateRequest todo)
+    {
+        TodoModel todoModel = await _service.UpdateTodo(id, todo.Title, todo.Completed, todo.Order);
+
+        return Ok(MappingTodoResponseFrom(todoModel));
+    }
+
     private TodoResponse MappingTodoResponseFrom(TodoModel todoModel)
     {
         if (todoModel is null)

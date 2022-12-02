@@ -27,6 +27,24 @@ public class TodoService : ITodoService
         return todoModel;
     }
 
+    public async Task<TodoModel> UpdateTodo(Guid id, string title, bool completed, int order)
+    {
+        if (string.IsNullOrEmpty(title))
+            throw new Exception("Title cannot be empty");
+
+        var todos = await _todoRepository.GetTodos();
+
+        if (!todos.Any(t => t.Id == id))
+            throw new Exception($"The id: {id} was not found");
+
+        if (todos.Any(t => t.Order == order))
+            throw new Exception($"The order: {order} was already taken");
+
+        TodoModel todoModel = await _todoRepository.UpdateTodo(id, title, completed, order);
+        return todoModel;
+    }
+
+
     public async Task<TodoModel> CreateTodo(string title)
     {
         if (string.IsNullOrEmpty(title))

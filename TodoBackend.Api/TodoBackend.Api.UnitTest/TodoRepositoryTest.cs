@@ -66,4 +66,29 @@ public class TodoRepositoryTest
         Assert.NotNull(result);
         result.Equals(todoModel);
     }
+
+    [Fact]
+    public async Task UpdateTodo_WithTodo_Return_TodoModified()
+    {
+        // Arrange
+        var todoRepository = new Mock<ITodoRepository>();
+        IEnumerable<TodoModel> todosModel = TodoMockData.GetSampleTodosModel();
+        TodoModel todoModel = TodoMockData.GetSampleTodoModelModified(todosModel.First().Id);
+
+        todoRepository.Setup(_ => _.GetTodos())
+                                   .ReturnsAsync(todosModel);
+
+        todoRepository.Setup(_ => _.UpdateTodo(It.IsAny<Guid>(), It.IsAny<string>(),
+                                               It.IsAny<bool>(), It.IsAny<int>()))
+                                   .ReturnsAsync(todoModel);
+
+        TodoService service = new TodoService(todoRepository.Object);
+
+        // Act
+        var result = await service.UpdateTodo(todoModel.Id, "Update Title", false, 10);
+
+        // Assert
+        Assert.NotNull(result);
+        result.Equals(todoModel);
+    }
 }
