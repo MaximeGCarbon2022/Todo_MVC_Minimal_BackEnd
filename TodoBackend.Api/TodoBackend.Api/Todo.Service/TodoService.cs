@@ -26,5 +26,14 @@ public class TodoService : ITodoService
 
         return todoModel;
     }
+
+    public async Task<TodoModel> CreateTodo(string title)
+    {
+        if (string.IsNullOrEmpty(title))
+            throw new Exception("Title cannot be empty");
+
+        TodoModel todoModel = await _todoRepository.CreateTodo(title);
+        return todoModel;
+    }
 }
 

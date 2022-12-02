@@ -45,6 +45,28 @@ ORDER BY [Order]
         return todoEntity.Select(item => MappingTodoModelFrom(item)).ToList();
     }
 
+    public async Task<TodoModel> CreateTodo(string title)
+    {
+        var sql = $@"
+DECLARE @id VARCHAR(MAX) = (SELECT NEWID())
+DECLARE @order INT = 0;
+
+IF ((SELECT COUNT(1) FROM {schema}.{todoTableName}) > 0)
+	SET @Order = (SELECT MAX([Order]) + 1 FROM {schema}.{todoTableName})
+
+INSERT INTO {schema}.{todoTableName} (Id, Title, [Order])
+VALUES (@id, @title, @order)
+
+SELECT @id
+";
+
+        using IDbConnection connection = new SqlConnection(_configuration.GetConnectionString(connectionId));
+        string id = await connection.QuerySingleAsync<string>(sql, new { title });
+
+        TodoModel TodoModel = await GetTodo(new Guid(id));
+        return TodoModel;
+    }
+
     private TodoModel MappingTodoModelFrom(TodoEntity todoEntity)
     {
         if (todoEntity is null)

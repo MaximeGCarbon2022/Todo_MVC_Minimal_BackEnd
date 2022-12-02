@@ -28,6 +28,15 @@ public class TodoController : ControllerBase
         return Ok(MappingTodoResponseFrom(todoModel));
     }
 
+    [HttpPost]
+    public async Task<IActionResult> CreateTodo(TodoCreationRequest todo)
+    {
+        TodoModel todoModel = await _service.CreateTodo(todo.Title);
+        var todoResponse = MappingTodoResponseFrom(todoModel);
+
+        return Created(todoResponse.Url, MappingTodoResponseFrom(todoModel));
+    }
+
     private TodoResponse MappingTodoResponseFrom(TodoModel todoModel)
     {
         if (todoModel is null)

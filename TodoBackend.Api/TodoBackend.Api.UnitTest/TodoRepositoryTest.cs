@@ -46,4 +46,24 @@ public class TodoRepositoryTest
         Assert.NotNull(result);
         result.Equals(todoModel);
     }
+
+    [Fact]
+    public async Task CreateTodo_WithTitle_Return_Todo()
+    {
+        // Arrange
+        var todoRepository = new Mock<ITodoRepository>();
+        TodoModel todoModel = TodoMockData.GetSampleTodoModel();
+
+        todoRepository.Setup(_ => _.CreateTodo(It.IsAny<string>()))
+                                   .ReturnsAsync(todoModel);
+
+        TodoService service = new TodoService(todoRepository.Object);
+
+        // Act
+        var result = await service.CreateTodo(todoModel.Title);
+
+        // Assert
+        Assert.NotNull(result);
+        result.Equals(todoModel);
+    }
 }
