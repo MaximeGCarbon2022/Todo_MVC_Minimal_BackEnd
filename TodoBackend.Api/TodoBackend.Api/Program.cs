@@ -1,10 +1,15 @@
 using TodoBackend.Api.Todo.Data;
 using TodoBackend.Api.Todo.Service;
+using TodoBackend.Api.Todo.Service.Exceptions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers(config =>
+    {
+        config.Filters.Add(new TodoServiceFilter());
+    })
+    .AddNewtonsoftJson();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
