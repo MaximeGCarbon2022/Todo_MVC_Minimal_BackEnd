@@ -16,5 +16,8 @@ public class TodoMockData
 
         return list;
     }
+
+    public static TodoModel GetSampleTodoModel()
+        => new TodoModel(Guid.NewGuid(), "Software craftsmanship", false, 1);
 }
 

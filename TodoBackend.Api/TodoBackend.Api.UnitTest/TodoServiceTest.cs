@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using Moq;
 using TodoBackend.Api.Todo.Api;
 using TodoBackend.Api.Todo.Service;
@@ -21,6 +22,27 @@ namespace TodoBackend.Api.UnitTest
 
             // Act
             var result = await controller.GetTodos();
+
+            // Assert
+            Assert.NotNull(result);
+            result.Equals(todosModel);
+        }
+
+        [Fact]
+        public async Task GetTodo_WithId_Return_Todo()
+        {
+            // Arrange
+            var todoService = new Mock<ITodoService>();
+            TodoModel todoModel = TodoMockData.GetSampleTodoModel();
+            IEnumerable<TodoModel> todosModel = TodoMockData.GetSampleTodosModel();
+
+            todoService.Setup(_ => _.GetTodo(It.IsAny<Guid>()))
+                                    .ReturnsAsync(todoModel);
+
+            TodoController controller = new TodoController(todoService.Object);
+
+            // Act
+            var result = await controller.GetTodo(todoModel.Id);
 
             // Assert
             Assert.NotNull(result);

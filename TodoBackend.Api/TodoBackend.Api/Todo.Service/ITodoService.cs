@@ -3,5 +3,5 @@
 public interface ITodoService
 {
     Task<IEnumerable<TodoModel>> GetTodos();
+    Task<TodoModel> GetTodo(Guid id);
 }
-

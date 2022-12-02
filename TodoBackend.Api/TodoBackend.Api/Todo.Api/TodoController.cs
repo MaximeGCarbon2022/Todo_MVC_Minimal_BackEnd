@@ -20,6 +20,13 @@ public class TodoController : ControllerBase
         return Ok(result.Select(item => MappingTodoResponseFrom(item)).ToList());
     }
 
+    public async Task<IActionResult> GetTodo(Guid id)
+    {
+        TodoModel todoModel = await _service.GetTodo(id);
+
+        return Ok(MappingTodoResponseFrom(todoModel));
+    }
+
     private TodoResponse MappingTodoResponseFrom(TodoModel todoModel)
     {
         if (todoModel is null)
