@@ -13,7 +13,7 @@ namespace TodoBackend.Api.Todo.Service.Exceptions
                 context.ExceptionHandled = true;
             }
 
-            if (context.Exception is TodoConflitOrderException)
+            if (context.Exception is TodoConflictOrderException)
             {
                 context.Result = new ConflictResult();
                 context.ExceptionHandled = true;

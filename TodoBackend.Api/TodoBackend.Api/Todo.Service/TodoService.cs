@@ -48,7 +48,7 @@ public class TodoService : ITodoService
             throw new TodoNotFoundException();
 
         if (todos.Any(t => t.Order == order))
-            throw new TodoConflitOrderException();
+            throw new TodoConflictOrderException();
 
         TodoModel todoModel = await _todoRepository.UpdateTodo(id, title, completed, order);
         return todoModel;

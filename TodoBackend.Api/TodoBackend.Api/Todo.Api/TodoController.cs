@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using TodoBackend.Api.Todo.Api.Model;
 using TodoBackend.Api.Todo.Service;
 
@@ -9,10 +10,16 @@ namespace TodoBackend.Api.Todo.Api;
 public class TodoController : ControllerBase
 {
     private readonly ITodoService _service;
+    private readonly LinkGenerator _linkGenerator;
 
-    public TodoController(ITodoService service) => _service = service;
+    public TodoController(ITodoService service, LinkGenerator linkGenerator)
+    {
+        _service = service;
+        _linkGenerator = linkGenerator;
+    }
 
     [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> GetTodos()
     {
         IEnumerable<TodoModel> result = await _service.GetTodos();
@@ -21,6 +28,8 @@ public class TodoController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetTodo(Guid id)
     {
         TodoModel todoModel = await _service.GetTodo(id);
@@ -29,6 +38,7 @@ public class TodoController : ControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType(StatusCodes.Status201Created)]
     public async Task<IActionResult> CreateTodo(TodoCreationRequest todo)
     {
         TodoModel todoModel = await _service.CreateTodo(todo.Title);
@@ -38,6 +48,9 @@ public class TodoController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> UpdateTodo(Guid id, TodoUpdateRequest todo)
     {
         TodoModel todoModel = await _service.UpdateTodo(id, todo.Title, todo.Completed, todo.Order);
@@ -46,6 +59,8 @@ public class TodoController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteTodo(Guid id)
     {
         await _service.DeleteTodo(id);
@@ -54,6 +69,7 @@ public class TodoController : ControllerBase
     }
 
     [HttpDelete]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> DeleteTodos([FromQuery] bool? isCompleted)
     {
         await _service.DeleteTodos(isCompleted);
@@ -65,7 +81,14 @@ public class TodoController : ControllerBase
         if (todoModel is null)
             return null;
 
-        return new TodoResponse(todoModel.Id, todoModel.Title, todoModel.Completed, todoModel.Order, "");
+        var urlGenerator = _linkGenerator.GetUriByAction(
+            HttpContext,
+            nameof(GetTodo),
+            "Todo",
+            todoModel.Id.ToString()
+           );
+
+        return new TodoResponse(todoModel.Id, todoModel.Title, todoModel.Completed, todoModel.Order, urlGenerator);
     }
 
 }
