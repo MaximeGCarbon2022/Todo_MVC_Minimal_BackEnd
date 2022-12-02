@@ -1,3 +1,4 @@
+using TodoBackend.Api.Todo.Data;
 using TodoBackend.Api.Todo.Service;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +12,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddRouting();
 
 builder.Services.AddScoped<ITodoService, TodoService>();
+builder.Services.AddScoped<ITodoRepository, TodoDapperRepository>();
 
 var app = builder.Build();
 
