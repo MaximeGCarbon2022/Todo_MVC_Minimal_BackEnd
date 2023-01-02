@@ -1,4 +1,5 @@
-﻿using TodoBackend.Api.Todo.Data;
+﻿using Microsoft.AspNetCore.JsonPatch;
+using TodoBackend.Api.Todo.Data;
 using TodoBackend.Api.Todo.Service.Exceptions;
 
 namespace TodoBackend.Api.Todo.Service;
@@ -51,6 +52,12 @@ public class TodoService : ITodoService
             throw new TodoConflictOrderException();
 
         TodoModel todoModel = await _todoRepository.UpdateTodo(id, title, completed, order);
+        return todoModel;
+    }
+
+    public async Task<TodoModel> UpdatePartialTodo(Guid id, string title, bool completed, int order)
+    {
+        TodoModel todoModel = await _todoRepository.UpdatePartialTodo(id, title, completed, order);
         return todoModel;
     }
 

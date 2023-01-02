@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Microsoft.AspNetCore.JsonPatch;
 using System.Data;
 using System.Data.SqlClient;
 using System.Text;
@@ -99,6 +100,23 @@ SET [Title] = @title,
     [Order] = @order
 WHERE [Id] = @id"
 ;
+        using IDbConnection connection = new SqlConnection(_configuration.GetConnectionString(connectionId));
+        await connection.ExecuteAsync(sql, new { id, title, completed, order });
+
+        TodoModel todoModel = await GetTodo(id);
+        return todoModel;
+    }
+
+    public async Task<TodoModel> UpdatePartialTodo(Guid id, string title, bool completed, int order)
+    {
+        var sql = $@"
+UPDATE {schema}.{todoTableName}
+SET [Title] = @title,
+    [Completed] = @completed,
+    [Order] = @order
+WHERE [Id] = @id"
+;
+
         using IDbConnection connection = new SqlConnection(_configuration.GetConnectionString(connectionId));
         await connection.ExecuteAsync(sql, new { id, title, completed, order });
 

@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
+﻿using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
 using TodoBackend.Api.Todo.Api.Model;
 using TodoBackend.Api.Todo.Service;
 
@@ -24,7 +24,7 @@ public class TodoController : ControllerBase
     {
         IEnumerable<TodoModel> result = await _service.GetTodos();
 
-        return Ok(result.Select(item => MappingTodoResponseFrom(item)).ToList());
+        return Ok(result.Select(item => MappingTodoResponseFrom(item, nameof(GetTodos))).ToList());
     }
 
     [HttpGet("{id}")]
@@ -34,7 +34,7 @@ public class TodoController : ControllerBase
     {
         TodoModel todoModel = await _service.GetTodo(id);
 
-        return Ok(MappingTodoResponseFrom(todoModel));
+        return Ok(MappingTodoResponseFrom(todoModel, nameof(GetTodo)));
     }
 
     [HttpPost]
@@ -42,9 +42,9 @@ public class TodoController : ControllerBase
     public async Task<IActionResult> CreateTodo(TodoCreationRequest todo)
     {
         TodoModel todoModel = await _service.CreateTodo(todo.Title);
-        var todoResponse = MappingTodoResponseFrom(todoModel);
+        var todoResponse = MappingTodoResponseFrom(todoModel, nameof(CreateTodo));
 
-        return Created(todoResponse.Url, MappingTodoResponseFrom(todoModel));
+        return Created(todoResponse.Url, todoResponse);
     }
 
     [HttpPut("{id}")]
@@ -55,7 +55,23 @@ public class TodoController : ControllerBase
     {
         TodoModel todoModel = await _service.UpdateTodo(id, todo.Title, todo.Completed, todo.Order);
 
-        return Ok(MappingTodoResponseFrom(todoModel));
+        return Ok(MappingTodoResponseFrom(todoModel, nameof(UpdateTodo)));
+    }
+
+    [HttpPatch("{id}")]
+    public async Task<IActionResult> UpdatePartialTodo(Guid id, [FromBody] JsonPatchDocument<TodoModel> patchDoc)
+    {
+        if (patchDoc != null)
+        {
+            var todoModel = await _service.GetTodo(id);
+            if (todoModel != null)
+            {
+                patchDoc.ApplyTo(todoModel);
+                await _service.UpdatePartialTodo(id, todoModel.Title, todoModel.Completed, todoModel.Order);
+                return Ok(MappingTodoResponseFrom(todoModel, nameof(UpdateTodo)));
+            }
+        }
+        return BadRequest();
     }
 
     [HttpDelete("{id}")]
@@ -76,19 +92,19 @@ public class TodoController : ControllerBase
 
         return NoContent();
     }
-    private TodoResponse MappingTodoResponseFrom(TodoModel todoModel)
+
+    private TodoResponse MappingTodoResponseFrom(TodoModel todoModel, string action)
     {
         if (todoModel is null)
             return null;
 
         var urlGenerator = _linkGenerator.GetUriByAction(
             HttpContext,
-            nameof(GetTodo),
+            action,
             "Todo",
             todoModel.Id.ToString()
            );
 
         return new TodoResponse(todoModel.Id, todoModel.Title, todoModel.Completed, todoModel.Order, urlGenerator);
     }
-
 }
