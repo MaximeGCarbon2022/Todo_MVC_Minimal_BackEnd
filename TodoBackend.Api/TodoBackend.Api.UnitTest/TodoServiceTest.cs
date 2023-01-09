@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Routing;
 using Moq;
 using TodoBackend.Api.Todo.Api;
 using TodoBackend.Api.Todo.Api.Model;
@@ -8,17 +9,20 @@ namespace TodoBackend.Api.UnitTest
 {
     public class TodoServiceTest
     {
+        private readonly LinkGenerator _linkGenerator;
+
         [Fact]
         public async Task GetTodos_Return_TodoList()
         {
             // Arrange
             var todoService = new Mock<ITodoService>();
+            var linkGenerator = new Mock<LinkGenerator>();
             IEnumerable<TodoModel> todosModel = TodoMockData.GetSampleTodosModel();
 
             todoService.Setup(_ => _.GetTodos())
                                     .ReturnsAsync(todosModel);
 
-            TodoController controller = new TodoController(todoService.Object);
+            TodoController controller = new TodoController(todoService.Object, linkGenerator.Object);
 
             // Act
             var result = await controller.GetTodos();
@@ -38,7 +42,7 @@ namespace TodoBackend.Api.UnitTest
             todoService.Setup(_ => _.GetTodo(It.IsAny<Guid>()))
                                     .ReturnsAsync(todoModel);
 
-            TodoController controller = new TodoController(todoService.Object);
+            TodoController controller = new TodoController(todoService.Object, _linkGenerator);
 
             // Act
             var result = await controller.GetTodo(todoModel.Id);
@@ -58,7 +62,7 @@ namespace TodoBackend.Api.UnitTest
             todoService.Setup(_ => _.CreateTodo(It.IsAny<string>()))
                                     .ReturnsAsync(todoModel);
 
-            TodoController controller = new TodoController(todoService.Object);
+            TodoController controller = new TodoController(todoService.Object, _linkGenerator);
 
             // Act
             TodoCreationRequest todoRequest = new TodoCreationRequest(todoModel.Title);
@@ -79,7 +83,7 @@ namespace TodoBackend.Api.UnitTest
             todoService.Setup(_ => _.CreateTodo(It.IsAny<string>()))
                                     .ReturnsAsync(todoModel);
 
-            TodoController controller = new TodoController(todoService.Object);
+            TodoController controller = new TodoController(todoService.Object, _linkGenerator);
 
             // Act
             TodoUpdateRequest todoRequest = new TodoUpdateRequest("Update Title", false, 10);
@@ -100,7 +104,7 @@ namespace TodoBackend.Api.UnitTest
             todoService.Setup(_ => _.DeleteTodo(It.IsAny<Guid>()))
                                     .ReturnsAsync(1);
 
-            TodoController controller = new TodoController(todoService.Object);
+            TodoController controller = new TodoController(todoService.Object, _linkGenerator);
 
             // Act
             await controller.DeleteTodo(todoModel.Id);
@@ -119,7 +123,7 @@ namespace TodoBackend.Api.UnitTest
             todoService.Setup(_ => _.DeleteTodos(It.IsAny<bool>()))
                                     .ReturnsAsync(todoModel.Count());
 
-            TodoController controller = new TodoController(todoService.Object);
+            TodoController controller = new TodoController(todoService.Object, _linkGenerator);
 
             // Act
             await controller.DeleteTodos(null);
@@ -139,7 +143,7 @@ namespace TodoBackend.Api.UnitTest
             todoService.Setup(_ => _.DeleteTodos(It.IsAny<bool>()))
                                     .ReturnsAsync(todoModel.Count());
 
-            TodoController controller = new TodoController(todoService.Object);
+            TodoController controller = new TodoController(todoService.Object, _linkGenerator);
 
             // Act
             await controller.DeleteTodos(true);
@@ -158,7 +162,7 @@ namespace TodoBackend.Api.UnitTest
             todoService.Setup(_ => _.DeleteTodos(It.IsAny<bool>()))
                                     .ReturnsAsync(todoModel.Count());
 
-            TodoController controller = new TodoController(todoService.Object);
+            TodoController controller = new TodoController(todoService.Object, _linkGenerator);
 
             // Act
             await controller.DeleteTodos(false);

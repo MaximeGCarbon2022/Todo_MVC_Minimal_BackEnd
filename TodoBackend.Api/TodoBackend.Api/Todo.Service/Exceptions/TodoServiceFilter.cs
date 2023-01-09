@@ -11,12 +11,15 @@ namespace TodoBackend.Api.Todo.Service.Exceptions
             {
                 context.Result = new NotFoundResult();
                 context.ExceptionHandled = true;
+                return;
             }
 
             if (context.Exception is TodoConflictOrderException)
             {
                 context.Result = new ConflictResult();
                 context.ExceptionHandled = true;
+                return;
+
             }
         }
 
